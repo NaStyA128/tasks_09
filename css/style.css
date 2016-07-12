@@ -1,0 +1,28 @@
+html{
+    position: relative;
+    float: none;
+    margin: 0;
+    padding: 0;
+    background-color: #FAE7B5;
+}
+
+h1{
+    text-align: center;
+}
+form{
+    display: block;
+    width: 500px;
+    margin: 0 auto;
+    border: 1px solid #79553D;
+    padding: 10px;
+    text-align: center;
+}
+form input[type='text']{
+    margin: 5px 0;
+}
+form input[type='submit']{
+    width: 245px;
+    cursor: pointer;
+    height: 40px;
+    margin-top: 10px;
+}
