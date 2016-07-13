@@ -18,8 +18,8 @@ class BattleField:
     def start(self):
         win = None
         armies = [Army.Army(squads=self.__squads_number,
-                       soldiers=self.__soldiers_number,
-                       vehicles=self.__vehicles_number, name=i)
+                            soldiers=self.__soldiers_number,
+                            vehicles=self.__vehicles_number, name=i)
                   for i in range(1, self.__armies_number + 1)]
         while True:
             if len(armies) == 1:
