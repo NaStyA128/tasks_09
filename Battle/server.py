@@ -1,6 +1,7 @@
-from wsgiref.simple_server import make_server
 from urllib.parse import parse_qs
-import BattleField
+from wsgiref.simple_server import make_server
+
+from Battle import BattleField
 
 
 def form(env):

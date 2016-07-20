@@ -1,7 +1,10 @@
-import Army
+from Battle import Army
 
 
 class BattleField:
+    """This simulator is determine a battle outcome based on probability
+    calculations.
+    """
     __armies_number = 2
     __strategy = 'random'
     __squads_number = 2
@@ -16,6 +19,12 @@ class BattleField:
         self.__vehicles_number = kwargs['vehicles_number']
 
     def start(self):
+        """Once the simulator is started all the army squads will start
+        attacking each other until there is only one army left.
+
+        Returns:
+            Number army, that won the battle.
+        """
         win = None
         armies = [Army.Army(squads=self.__squads_number,
                             soldiers=self.__soldiers_number,
@@ -32,13 +41,12 @@ class BattleField:
                     for j in target:
                         i.attack(j, self.__strategy)
                         j.attack(i, self.__strategy)
-                        if i.get_health() <= 0:
-                            armies.remove(i)
-                        elif j.get_health() <= 0:
+                        if j.get_health() <= 0:
                             armies.remove(j)
                             target.remove(j)
+                    if i.get_health() <= 0:
+                        armies.remove(i)
                     if len(armies) == 1:
                         win = armies[0].get_name()
                         break
         return win
-

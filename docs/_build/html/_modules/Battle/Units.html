@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Battle.Units &mdash; BattleField 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="BattleField 1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Battle.Units</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span><span class="p">,</span> <span class="n">abstractproperty</span>
+
+
+<div class="viewcode-block" id="Unit"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit">[docs]</a><span class="k">class</span> <span class="nc">Unit</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class-parent.</span>
+
+<span class="sd">    It contains the methods of attack, take damage. It allow you to set</span>
+<span class="sd">    for unit a health, a recharge and next attack time. It allow you to get</span>
+<span class="sd">    these options, and an experience and checking attack.</span>
+<span class="sd">    Each unit represents either a soldier or a vehicle maned by</span>
+<span class="sd">    a predetermined number of soldiers.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        prev_time: the previous attack.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">ABCMeta</span>
+    <span class="n">__health</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__recharge</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">__next_attack_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">prev_time</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span> <span class="nf">do_attack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># атака</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Unit.take_damage"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit.take_damage">[docs]</a>    <span class="k">def</span> <span class="nf">take_damage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="c1"># получение атаки и блок</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_recharge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents the number of ms required to recharge the unit</span>
+<span class="sd">        for an attack.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The value of the attribute &#39;recharge&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__recharge</span>
+
+<div class="viewcode-block" id="Unit.set_recharge"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit.set_recharge">[docs]</a>    <span class="k">def</span> <span class="nf">set_recharge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recharge</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It set the value of the attribute &#39;recharge&#39;.</span>
+
+<span class="sd">        Represents the number of ms required to recharge the unit</span>
+<span class="sd">        for an attack.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            recharge: the value of the recharge.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__recharge</span> <span class="o">=</span> <span class="n">recharge</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_health</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents the health of the unit.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The value of the attribute &#39;health&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__health</span>
+
+<div class="viewcode-block" id="Unit.set_health"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit.set_health">[docs]</a>    <span class="k">def</span> <span class="nf">set_health</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">health</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It set the value of the attribute &#39;recharge&#39;.</span>
+
+<span class="sd">        Represents the health of the unit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            health: the value of the health.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__health</span> <span class="o">=</span> <span class="n">health</span></div>
+
+    <span class="nd">@abstractproperty</span>
+    <span class="k">def</span> <span class="nf">get_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents the experience of the unit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_next_attack_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents the next attack time of the unit.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The value of the attribute &#39;next_attack_time&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__next_attack_time</span>
+
+<div class="viewcode-block" id="Unit.set_next_attack_time"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit.set_next_attack_time">[docs]</a>    <span class="k">def</span> <span class="nf">set_next_attack_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">next_attack_time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;It set the value of the attribute &#39;next_attack_time&#39;.</span>
+
+<span class="sd">        Represents the next attack time of the unit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            next_attack_time: the value of the next attack time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__next_attack_time</span> <span class="o">=</span> <span class="n">next_attack_time</span></div>
+
+<div class="viewcode-block" id="Unit.check_attack"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Unit.check_attack">[docs]</a>    <span class="k">def</span> <span class="nf">check_attack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;We check, can a unit to attack.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">             True: if now time exceed next attack time or if the unit</span>
+<span class="sd">             do not attacked.</span>
+
+<span class="sd">             False: if now time do not exceed next attack time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">next_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prev_time</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_recharge</span>
+            <span class="k">if</span> <span class="n">now</span> <span class="o">&gt;=</span> <span class="n">next_time</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span></div></div>
+
+
+<div class="viewcode-block" id="Solder"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Solder">[docs]</a><span class="k">class</span> <span class="nc">Solder</span><span class="p">(</span><span class="n">Unit</span><span class="p">):</span>
+    <span class="n">__experience</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_health</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_recharge</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10000</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Represents the experience of the solder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__experience</span>
+
+<div class="viewcode-block" id="Solder.set_experience"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Solder.set_experience">[docs]</a>    <span class="k">def</span> <span class="nf">set_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;We set the experience of the solder.</span>
+
+<span class="sd">         The experience property is incremented after each successful attack,</span>
+<span class="sd">         and is sed to calculate the attack success probability and the</span>
+<span class="sd">         amount of damage inflicted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__experience</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__experience</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">do_attack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Soldier attack</span>
+
+<span class="sd">        Soldiers attack success probability is calculated:</span>
+
+<span class="sd">        0.5 * (1 + health/100) * random(50 + experience, 100) / 100</span>
+
+<span class="sd">        where random(min, max) returns a random number between</span>
+<span class="sd">        min and max (inclusive).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The value of soldier attack.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_health</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_attack</span><span class="p">():</span>
+            <span class="n">soldiers_attack</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_health</span><span class="p">)</span> <span class="o">*</span> \
+                <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">50</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__experience</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_experience</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prev_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">return</span> <span class="n">soldiers_attack</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Solder.take_damage"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Solder.take_damage">[docs]</a>    <span class="k">def</span> <span class="nf">take_damage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">damage</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The amount of damage.</span>
+
+<span class="sd">        The amount of damage a soldier can afflict is calculated as follows:</span>
+
+<span class="sd">        0.05 + experience / 100</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            damage:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attack</span> <span class="o">=</span> <span class="n">damage</span> <span class="o">-</span> <span class="p">(</span><span class="mf">0.05</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__experience</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_health</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_health</span> <span class="o">-</span> <span class="n">attack</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Vehicles"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Vehicles">[docs]</a><span class="k">class</span> <span class="nc">Vehicles</span><span class="p">(</span><span class="n">Unit</span><span class="p">):</span>
+    <span class="n">operators</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_recharge</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10000</span><span class="p">)</span>
+        <span class="n">operator_count</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">operators</span> <span class="o">=</span> <span class="p">[</span><span class="n">Solder</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">operator_count</span><span class="p">)]</span>
+        <span class="n">list_operators</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">get_health</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_health</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">list_operators</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_operators</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Vehicles.get_operators"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Vehicles.get_operators">[docs]</a>    <span class="k">def</span> <span class="nf">get_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The operators of the vehicle.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A list of operators. For example:</span>
+
+<span class="sd">            [&lt;Battle.Units.Solder object at 0x7fa64372b588&gt;,</span>
+<span class="sd">            &lt;Battle.Units.Solder object at 0x7fa64372b5f8&gt;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_experience</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The experience of the vehicle.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           The sum of all experiences of soldiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">get_experience</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">])</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Vehicles.alive"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Vehicles.alive">[docs]</a>    <span class="k">def</span> <span class="nf">alive</span><span class="p">(</span><span class="n">units</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Survivors in the vehicle.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            units: operators in the vehicle.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            If there are survivors, return True, else - return False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">units</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">get_health</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">do_attack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The Vehicle attack.</span>
+
+<span class="sd">        The Vehicle attack success probability is determined as follows:</span>
+
+<span class="sd">        0.5 * (1 + vehicle.health / 100) * gavg(operators.attack_success)</span>
+
+<span class="sd">        where gavg is the geometric average of the attack success of all</span>
+<span class="sd">        the vehicle operators.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Total value of the vehicle attack.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_health</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_attack</span><span class="p">()</span> \
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">):</span>
+            <span class="n">list_attack_soldiers</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">do_attack</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">]</span>
+            <span class="n">vehicles_attack</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_health</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">list_attack_soldiers</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_attack_soldiers</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prev_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="k">return</span> <span class="n">vehicles_attack</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Vehicles.take_damage"><a class="viewcode-back" href="../../Battle.html#Battle.Units.Vehicles.take_damage">[docs]</a>    <span class="k">def</span> <span class="nf">take_damage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">damage</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The damage of the vehicle.</span>
+
+<span class="sd">        The damage afflicted by a vehicle is calculated:</span>
+
+<span class="sd">        0.1 + sum(operators.experience / 100)</span>
+
+<span class="sd">        The total damage inflicted on the vehicle is distributed to the</span>
+<span class="sd">        operators as follows: 60% of the total damage is inflicted on the</span>
+<span class="sd">        vehicle 20% of the total damage is inflicted on a random vehicle</span>
+<span class="sd">        operator. The rest of the damage is inflicted evenly to the other</span>
+<span class="sd">        operators (10% each).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            damage: the value of damage, that caused this vehicle.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_operators_experience</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">get_experience</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">]</span>
+        <span class="n">damage</span> <span class="o">-=</span> <span class="mf">0.1</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list_operators_experience</span><span class="p">)</span>
+        <span class="c1"># 60% урона на машину</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_health</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_health</span> <span class="o">-</span> <span class="n">damage</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">)</span>
+        <span class="c1"># случайный оператор, который получит 20% урона</span>
+        <span class="n">random_operator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">random_operator</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">take_damage</span><span class="p">(</span><span class="n">damage</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">operators</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">take_damage</span><span class="p">(</span><span class="n">damage</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Nastya Goloviznina.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
