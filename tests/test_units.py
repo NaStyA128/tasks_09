@@ -22,7 +22,7 @@ class TestUnit:
 
     def test_check_attack(self):
         unit = Unit()
-        assert unit.check_attack() == True
+        assert unit.check_attack() is True
 
 
 class TestSolder:
@@ -40,3 +40,39 @@ class TestSolder:
         assert solder.do_attack == 0.505
         solder.set_health(0)
         assert solder.do_attack == 0
+
+    def test_take_damage(self):
+        solder = Solder()
+        assert solder.get_experience == 0
+        solder.set_health(100)
+        solder.take_damage(10)
+        assert solder.get_health == 90.05
+
+
+class TestVehicles:
+
+    def test_get_operators(self):
+        vehicle = Vehicles()
+        assert isinstance(vehicle.operators[0], Solder)
+        assert 1 <= len(vehicle.operators) <= 3
+
+    @patch('Battle.Units.random')
+    def test_get_experience(self, mock_random):
+        mock_random.randint = Mock(return_value=2)
+        vehicle = Vehicles()
+        assert len(vehicle.operators) == 2
+        assert vehicle.get_experience == 0
+
+    def test_alive(self):
+        vehicle = Vehicles()
+        units = vehicle.get_operators()
+        assert vehicle.alive(units) is True
+
+    @patch('Battle.Units.random')
+    def test_do_attack(self, mock_random):
+        mock_random.randint = Mock(return_value=1)
+        vehicle = Vehicles()
+        assert vehicle.do_attack == 0.505
+
+    def test_take_damage(self):
+        pass
